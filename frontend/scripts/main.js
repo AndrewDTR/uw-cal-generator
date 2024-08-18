@@ -46,11 +46,8 @@ function displayScheduleData(scheduleData, targetDiv) {
   for (let key in scheduleData) {
     let classInfo = scheduleData[key];
     let content = `<div class="class-detail" style="display: block;">`;
-    content += `<h4>${key}</h4>`;
+    content += `<h4>${classInfo.title}</h4>`;
 
-    if (classInfo.title) {
-      content += `<p>Title: ${classInfo.title}</p>`
-    }
     if (classInfo.lecture) {
       content += `<p>Lecture: ${classInfo.lecture}</p>`;
     }
