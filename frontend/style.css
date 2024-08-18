@@ -1,0 +1,16 @@
+.navbar {
+  height: 58px;
+}
+.navbar div {
+  font-size: 22px;
+}
+
+.footer-height {
+    height: 60px;
+}
+
+.results {
+  overflow-y: auto; 
+  max-height: 100%;
+  overflow: auto;
+}
