@@ -1,30 +1,30 @@
 import { parseSchedule } from "./parseSchedule.js";
 
-const fallButton = document.getElementById('fall2024');
-const springButton = document.getElementById('spring2025');
-let currentTerm = "Fall 2024"
+// const fallButton = document.getElementById('fall2024');
+// const springButton = document.getElementById('spring2025');
+// let currentTerm = "Fall 2024"
 
-// button term switcher
-function handleSelection(event) {
-  event.preventDefault();
+// // button term switcher
+// function handleSelection(event) {
+//   event.preventDefault();
 
-  fallButton.classList.remove('active');
-  springButton.classList.remove('active');
+//   fallButton.classList.remove('active');
+//   springButton.classList.remove('active');
 
-  event.target.classList.add('active');
+//   event.target.classList.add('active');
 
-  if (currentTerm != event.target.innerText) {
-    currentTerm = event.target.innerText;
-    console.log(currentTerm);
-  }
-}
+//   if (currentTerm != event.target.innerText) {
+//     currentTerm = event.target.innerText;
+//     console.log(currentTerm);
+//   }
+// }
 
-fallButton.addEventListener('click', handleSelection);
-springButton.addEventListener('click', handleSelection);
+// fallButton.addEventListener('click', handleSelection);
+// springButton.addEventListener('click', handleSelection);
 
 document.addEventListener('DOMContentLoaded', function () {
   var textarea = document.getElementById('classInput');
-  var resultsDiv = document.querySelector('.results .col-12');
+  var resultsDiv = document.querySelector('.real-one');
 
   textarea.addEventListener('input', function () {
     var scheduleData = parseSchedule(this.value);
@@ -37,9 +37,11 @@ function displayScheduleData(scheduleData, targetDiv) {
   targetDiv.innerHTML = '';
 
   if (Object.keys(scheduleData).length === 0) {
-    targetDiv.innerHTML = '<div class="class-detail"><h3>No Schedule Data Found</h3></div>';
+    targetDiv.innerHTML = '<div class="class-detail"><h3>⚠ Error understanding your schedule. Are you sure you copied and pasted the entire thing?</h3></div>';
     return;
   }
+
+  targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
 
   for (let key in scheduleData) {
     let classInfo = scheduleData[key];

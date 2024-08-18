@@ -6,6 +6,10 @@ export function parseSchedule(scheduleText) {
     let activeClass = {};
 
     scheduleList.forEach(line => {
+        if (line == "Courses") {
+            // some people might accidentally include this
+        }
+
         let lineType = getLineType(line);
 
         switch (lineType) {

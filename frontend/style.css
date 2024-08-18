@@ -6,11 +6,17 @@
 }
 
 .footer-height {
-    height: 60px;
+  height: 60px;
+}
+.a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container-fluid {
+  flex-grow: 1;
 }
 
 .results {
   overflow-y: auto; 
-  max-height: 100%;
-  overflow: auto;
 }
