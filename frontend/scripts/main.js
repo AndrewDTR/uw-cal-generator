@@ -37,32 +37,41 @@ function displayScheduleData(scheduleData, targetDiv) {
   targetDiv.innerHTML = '';
 
   if (Object.keys(scheduleData).length === 0) {
-    targetDiv.innerHTML = '<div class="class-detail"><h3>⚠ Error understanding your schedule. Are you sure you copied and pasted the entire thing?</h3></div>';
-    return;
+      targetDiv.innerHTML = '<div class="class-detail error"><h3>⚠ Error understanding your schedule. Are you sure you copied and pasted the entire thing?</h3></div>';
+      return;
   }
 
   targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
+  
+  let content = '';
+  let rowOpened = false;
 
-  for (let key in scheduleData) {
-    let classInfo = scheduleData[key];
-    let content = `<div class="class-detail" style="display: block;">`;
-    content += `<h4>${classInfo.title}</h4>`;
+  Object.keys(scheduleData).forEach((key, index) => {
+      if (index % 2 === 0) {
+          if (rowOpened) {
+              content += '</div>';
+          }
+          content += '<div class="row">';
+          rowOpened = true;
+      }
 
-    if (classInfo.lecture) {
-      content += `<p>Lecture: ${classInfo.lecture}</p>`;
-    }
-    if (classInfo.discussion) {
-      content += `<p>Discussion: ${classInfo.discussion}</p>`;
-    }
-    if (classInfo.lab) {
-      content += `<p>Lab: ${classInfo.lab}</p>`;
-    }
-    if (classInfo.exam) {
-      content += `<p>Exam: ${classInfo.exam}</p>`;
-    }
+      const classInfo = scheduleData[key];
+      content += `<div class="col-md-6 class-detail card">`;
+      content += `<h5>${classInfo.title}</h5>`;
 
+      ['lecture', 'discussion', 'lab', 'exam'].forEach(field => {
+          if (classInfo[field]) {
+              content += `<p class="condensed">${field.charAt(0).toUpperCase() + field.slice(1)}: ${classInfo[field]}</p>`;
+          }
+      });
 
-    content += `</div>`;
-    targetDiv.innerHTML += content;
-  }
+      content += '</div>';
+
+      if (index === Object.keys(scheduleData).length - 1 && rowOpened) {
+          content += '</div>';
+          rowOpened = false;
+      }
+  });
+
+  targetDiv.innerHTML += content;
 }

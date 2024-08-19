@@ -18,5 +18,20 @@
 }
 
 .results {
-  overflow-y: auto; 
+  overflow-y: auto;
+}
+
+.condensed {
+  margin-bottom: 2px; /* Reduce space between paragraphs */
+}
+.class-detail h4 {
+  margin-top: 10px;
+  margin-bottom: 5px; /* Reduce space below headings */
+}
+.class-detail {
+  padding: 2px; /* Reduce padding within each class detail box */
+}
+
+.card {
+  border-radius: 8px; /* Rounded corners */
 }

@@ -7,7 +7,7 @@ export function parseSchedule(scheduleText) {
 
     scheduleList.forEach(line => {
         if (line == "Courses") {
-            // some people might accidentally include this
+            // this is the first line of the schedule. some people might accidentally include this
         }
 
         let lineType = getLineType(line);
@@ -51,6 +51,7 @@ export function parseSchedule(scheduleText) {
     return classes;
 }
 
+// helper method for switch statement above to determine line type
 function getLineType(line) {
     if (line.startsWith("LEC")) {
         return 'LEC';
