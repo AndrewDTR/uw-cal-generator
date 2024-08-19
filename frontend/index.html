@@ -21,13 +21,16 @@
           UW .ics Schedule Generator
         </div>
         <div class="ms-auto">
-          <a class="btn btn-outline-light" href="https://github.com/AndrewDTR/uw-cal-generator" target="_blank">
+          <a
+            class="btn btn-outline-light"
+            href="https://github.com/AndrewDTR/uw-cal-generator"
+            target="_blank"
+          >
             <i class="fab fa-github"></i> GitHub
           </a>
         </div>
       </div>
     </nav>
-    
 
     <div class="container-fluid flex-grow-1 d-flex">
       <div class="row flex-grow w-100">
@@ -76,8 +79,8 @@
                         >UW's Course Schedule</a
                       >
                       page. (Link not working? Go to
-                      <a href="https://my.wisc.edu/" target="_blank">MyUW</a> ->
-                      "Course Schedule."
+                      <a href="https://my.wisc.edu/" target="_blank">MyUW</a>
+                      &rarr; "Course Schedule.")
                     </li>
                     <li>
                       Select the term you want to generate the schedule for in
@@ -153,7 +156,7 @@
           <div class="row">
             <div
               class="col-12 border border-dark p-3 results real-one"
-              style="flex-shrink: 0;"
+              style="flex-shrink: 0"
             >
               <h3>Waiting for class data to be pasted...</h3>
             </div>
@@ -162,17 +165,23 @@
             <div
               class="border border-dark align-items-center justify-content-center"
             >
-            <div class="p-1 pt-2">
-              <h3>Current Semester Detected: Loading...</h3>
-            </div>
-              <button type="button" disabled id="download" class="btn btn-primary">
+              <div class="p-1 pt-2">
+                <h3 id="current-semester">
+                  Current Semester Detected: Loading...
+                </h3>
+                <div id="breaks"></div>
+              </div>
+              <button
+                type="button"
+                disabled
+                id="download"
+                class="btn btn-primary mb-3"
+              >
                 Download schedule
               </button>
             </div>
           </div>
         </div>
-        
-        
       </div>
     </div>
 

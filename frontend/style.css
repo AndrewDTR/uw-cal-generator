@@ -22,16 +22,16 @@
 }
 
 .condensed {
-  margin-bottom: 2px; /* Reduce space between paragraphs */
+  margin-bottom: 2px;
 }
 .class-detail h4 {
   margin-top: 10px;
-  margin-bottom: 5px; /* Reduce space below headings */
+  margin-bottom: 5px;
 }
 .class-detail {
-  padding: 2px; /* Reduce padding within each class detail box */
+  padding: 2px;
 }
 
 .card {
-  border-radius: 8px; /* Rounded corners */
+  border-radius: 8px;
 }

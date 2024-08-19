@@ -4,9 +4,12 @@ const { ICalCalendarMethod } = require("ical-generator");
 const app = express();
 const fs = require("fs");
 const path = require("path");
+const cors = require('cors');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+// TODO remove cors, only for testing
+app.use(cors());
 
 app.post("/", (req, res) => {
     console.log("Received body:", req.body);

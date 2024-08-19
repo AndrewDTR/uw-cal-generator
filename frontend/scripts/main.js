@@ -22,10 +22,13 @@ import { parseSchedule } from "./parseSchedule.js";
 // fallButton.addEventListener('click', handleSelection);
 // springButton.addEventListener('click', handleSelection);
 
+let infoLoaded = false;
+
 document.addEventListener('DOMContentLoaded', function () {
     var textarea = document.getElementById('classInput');
     var resultsDiv = document.querySelector('.real-one');
     let scheduleData = {};
+    let dateData = {};
 
     textarea.addEventListener('input', function () {
         scheduleData = parseSchedule(this.value);
@@ -35,9 +38,63 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('button.btn.btn-primary').addEventListener('click', function () {
         sendData(scheduleData);
     });
+
+    fetch('http://localhost:3000/api/dates')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network error');
+            }
+            return response.json();
+        })
+        .then(data => {
+            infoLoaded = true;
+            const dateData = data;
+            console.log('Fetched schedule data:', dateData);
+
+            var currentSemesterElement = document.getElementById('current-semester');
+            currentSemesterElement.innerHTML = `Current Semester Detected: ${dateData.info.semester}`;
+
+            var breaksElement = document.getElementById('breaks');
+
+            if (dateData.once || dateData.range) {
+                var eventElement = document.createElement('div');
+                eventElement.innerHTML = `<h5>Academic Breaks for this Semester:</h5>`;
+                breaksElement.appendChild(eventElement);
+
+                dateData.once.forEach(event => {
+                    eventElement = document.createElement('div');
+                    eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.date}`;
+                    breaksElement.appendChild(eventElement);
+                });
+
+                dateData.range.forEach(event => {
+                    eventElement = document.createElement('div');
+                    eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.start_date} to ${event.end_date}`;
+                    breaksElement.appendChild(eventElement);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching schedule data:', error);
+
+            var currentSemesterElement = document.getElementById('current-semester');
+            currentSemesterElement.innerHTML = `Current Semester Detected: Error`;
+        });
+
+
+
 });
 
-// this entire thing is debug for now and there should be a nicer way of displaying data
+// sanitize input to prevent any scripting attacks
+function escapeHTML(input) {
+    return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function displayScheduleData(scheduleData, targetDiv) {
     targetDiv.innerHTML = '';
 
@@ -47,7 +104,11 @@ function displayScheduleData(scheduleData, targetDiv) {
         return;
     }
 
-    targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
+    if (Object.keys(scheduleData).length == 1) {
+        targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} class!</h2>`;
+    } else {
+        targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
+    }
     document.getElementById("download").disabled = false;
 
     let content = '';
@@ -64,11 +125,11 @@ function displayScheduleData(scheduleData, targetDiv) {
 
         const classInfo = scheduleData[key];
         content += `<div class="col-md-6 class-detail card">`;
-        content += `<h5>${classInfo.title}</h5>`;
+        content += `<h5>${escapeHTML(classInfo.title)}</h5>`;
 
         ['lecture', 'discussion', 'lab', 'exam'].forEach(field => {
             if (classInfo[field]) {
-                content += `<p class="condensed">${field.charAt(0).toUpperCase() + field.slice(1)}: ${classInfo[field]}</p>`;
+                content += `<p class="condensed">${escapeHTML(field.charAt(0).toUpperCase() + field.slice(1))}: ${escapeHTML(classInfo[field])}</p>`;
             }
         });
 
