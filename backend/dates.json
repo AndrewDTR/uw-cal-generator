@@ -1,0 +1,22 @@
+{
+    "info": {
+        "semester": "Fall 2024"
+    },
+    "start-end": {
+        "start_date": "2024-09-04",
+        "end_date": "2024-12-11"
+    },
+    "once": [
+        {
+            "title": "Labor Day",
+            "date": "2024-09-02"
+        }
+    ],
+    "range": [
+        {
+            "title": "Thanksgiving Recess",
+            "start_date": "2024-11-28",
+            "end_date": "2024-12-01"
+        }
+    ]
+}

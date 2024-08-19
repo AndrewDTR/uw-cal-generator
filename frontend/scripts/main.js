@@ -23,55 +23,81 @@ import { parseSchedule } from "./parseSchedule.js";
 // springButton.addEventListener('click', handleSelection);
 
 document.addEventListener('DOMContentLoaded', function () {
-  var textarea = document.getElementById('classInput');
-  var resultsDiv = document.querySelector('.real-one');
+    var textarea = document.getElementById('classInput');
+    var resultsDiv = document.querySelector('.real-one');
+    let scheduleData = {};
 
-  textarea.addEventListener('input', function () {
-    var scheduleData = parseSchedule(this.value);
-    displayScheduleData(scheduleData, resultsDiv);
-  });
+    textarea.addEventListener('input', function () {
+        scheduleData = parseSchedule(this.value);
+        displayScheduleData(scheduleData, resultsDiv);
+    });
+
+    document.querySelector('button.btn.btn-primary').addEventListener('click', function () {
+        sendData(scheduleData);
+    });
 });
 
 // this entire thing is debug for now and there should be a nicer way of displaying data
 function displayScheduleData(scheduleData, targetDiv) {
-  targetDiv.innerHTML = '';
+    targetDiv.innerHTML = '';
 
-  if (Object.keys(scheduleData).length === 0) {
-      targetDiv.innerHTML = '<div class="class-detail error"><h3>⚠ Error understanding your schedule. Are you sure you copied and pasted the entire thing?</h3></div>';
-      return;
-  }
+    if (Object.keys(scheduleData).length === 0) {
+        targetDiv.innerHTML = '<div class="class-detail error"><h3>⚠ Error understanding your schedule. Are you sure you copied and pasted the entire thing?</h3></div>';
+        document.getElementById("download").disabled = true;
+        return;
+    }
 
-  targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
-  
-  let content = '';
-  let rowOpened = false;
+    targetDiv.innerHTML += `<h2>✅ Successfully parsed ${Object.keys(scheduleData).length} classes!</h2>`;
+    document.getElementById("download").disabled = false;
 
-  Object.keys(scheduleData).forEach((key, index) => {
-      if (index % 2 === 0) {
-          if (rowOpened) {
-              content += '</div>';
-          }
-          content += '<div class="row">';
-          rowOpened = true;
-      }
+    let content = '';
+    let rowOpened = false;
 
-      const classInfo = scheduleData[key];
-      content += `<div class="col-md-6 class-detail card">`;
-      content += `<h5>${classInfo.title}</h5>`;
+    Object.keys(scheduleData).forEach((key, index) => {
+        if (index % 2 === 0) {
+            if (rowOpened) {
+                content += '</div>';
+            }
+            content += '<div class="row">';
+            rowOpened = true;
+        }
 
-      ['lecture', 'discussion', 'lab', 'exam'].forEach(field => {
-          if (classInfo[field]) {
-              content += `<p class="condensed">${field.charAt(0).toUpperCase() + field.slice(1)}: ${classInfo[field]}</p>`;
-          }
-      });
+        const classInfo = scheduleData[key];
+        content += `<div class="col-md-6 class-detail card">`;
+        content += `<h5>${classInfo.title}</h5>`;
 
-      content += '</div>';
+        ['lecture', 'discussion', 'lab', 'exam'].forEach(field => {
+            if (classInfo[field]) {
+                content += `<p class="condensed">${field.charAt(0).toUpperCase() + field.slice(1)}: ${classInfo[field]}</p>`;
+            }
+        });
 
-      if (index === Object.keys(scheduleData).length - 1 && rowOpened) {
-          content += '</div>';
-          rowOpened = false;
-      }
-  });
+        content += '</div>';
 
-  targetDiv.innerHTML += content;
+        if (index === Object.keys(scheduleData).length - 1 && rowOpened) {
+            content += '</div>';
+            rowOpened = false;
+        }
+    });
+
+    targetDiv.innerHTML += content;
+}
+
+function sendData(data) {
+    const urlEncodedData = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(data)) {
+        urlEncodedData.append(key, JSON.stringify(value));
+    }
+
+    fetch("http://localhost:3000/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: urlEncodedData.toString()
+    })
+        .then(response => response.text())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
 }
