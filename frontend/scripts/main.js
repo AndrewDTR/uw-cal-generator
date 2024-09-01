@@ -36,7 +36,36 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.querySelector('button.btn.btn-primary').addEventListener('click', function () {
-        sendData(scheduleData);
+        const urlEncodedData = new URLSearchParams();
+    
+        for (const [key, value] of Object.entries(scheduleData)) {
+            urlEncodedData.append(key, JSON.stringify(value));
+        }
+    
+        fetch("http://localhost:3000/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: urlEncodedData.toString(),
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob(); 
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'schedule.ics'; 
+                document.body.appendChild(a);
+                a.click(); 
+                a.remove(); 
+            })
+            .catch(error => console.error('Error:', error));
     });
 
     fetch('http://localhost:3000/api/dates')
