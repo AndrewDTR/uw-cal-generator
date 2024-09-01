@@ -85,23 +85,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var breaksElement = document.getElementById('breaks');
 
-            if (dateData.once || dateData.range) {
+            if (dateData['start-end'] || dateData.once || dateData.range) {
                 var eventElement = document.createElement('div');
-                eventElement.innerHTML = `<h5>Academic Breaks for this Semester:</h5>`;
+                eventElement.style.paddingBottom = '1px';
+            
+                eventElement.innerHTML = `<strong>Semester Classes Start Date:</strong> ${dateData['start-end'].start_date}<br><strong>Semester Classes End Date:</strong> ${dateData['start-end'].end_date}`;
                 breaksElement.appendChild(eventElement);
-
+            
+                eventElement = document.createElement('div');
+                eventElement.innerHTML = `<h5 style="padding-top: 10px;">Academic Breaks for this Semester:</h5>`;
+                breaksElement.appendChild(eventElement);
+            
                 dateData.once.forEach(event => {
                     eventElement = document.createElement('div');
                     eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.date}`;
                     breaksElement.appendChild(eventElement);
                 });
-
+            
                 dateData.range.forEach(event => {
                     eventElement = document.createElement('div');
                     eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.start_date} to ${event.end_date}`;
                     breaksElement.appendChild(eventElement);
                 });
             }
+            
+            
         })
         .catch(error => {
             console.error('Error fetching schedule data:', error);
