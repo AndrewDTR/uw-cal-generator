@@ -49,10 +49,55 @@ const loadSemesterDates = () => {
     } catch (err) {
         console.error("Error loading semester dates:", err);
         return {
-            startDate: new Date(), // default to current date if there's an error
+            startDate: new Date(),
             endDate: new Date()
         };
     }
+};
+
+const parseTime = (timeString, date) => {
+    const [time, modifier] = timeString.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (modifier === 'PM' && hours < 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+
+    const parsedDate = new Date(date);
+    parsedDate.setHours(hours, minutes, 0, 0);
+    return parsedDate;
+};
+
+const adjustDateToDayOfWeek = (date, dayOfWeek) => {
+    const currentDay = date.getDay(); // sunday - saturday maps to 0 - 6
+    const targetDay = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].indexOf(dayOfWeek);
+    const dayDifference = (targetDay - currentDay + 7) % 7;
+    const adjustedDate = new Date(date);
+    adjustedDate.setDate(date.getDate() + dayDifference);
+    return adjustedDate;
+};
+
+const addEventToCalendar = (calendar, title, location, days, startTime, endTime, startDate, endDate, excludedDates) => {
+    const daysMapping = { M: 'MO', T: 'TU', W: 'WE', R: 'TH', F: 'FR' };
+
+    days.split('').forEach(day => {
+        const dayOfWeek = daysMapping[day];
+        const eventStartDate = adjustDateToDayOfWeek(new Date(startDate), dayOfWeek);
+        const eventEndDate = new Date(eventStartDate);
+
+        calendar.createEvent({
+            start: parseTime(startTime, eventStartDate),
+            end: parseTime(endTime, eventEndDate),
+            timezone: "America/Chicago",
+            summary: title,
+            description: `Class: ${title}`,
+            location: location,
+            repeating: {
+                freq: 'WEEKLY',
+                byDay: [dayOfWeek],
+                until: endDate,
+                exclude: excludedDates
+            }
+        });
+    });
 };
 
 app.post("/", (req, res) => {
@@ -68,51 +113,37 @@ app.post("/", (req, res) => {
             const parsedData = JSON.parse(req.body[key]);
 
             if (parsedData.lecture && !parsedData.lecture.includes("ONLINE")) {
-                const lectureInfo = parsedData.lecture.match(/(\b[A-Z]+\b)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})/);
-                if (lectureInfo) {
-                    const daysOfWeek = lectureInfo[1]; 
-                    const startTime = lectureInfo[2];
-                    const endTime = lectureInfo[3]; 
-
-                    const [startHour, startMinute] = startTime.split(/:| /).map(Number);
-                    const [endHour, endMinute] = endTime.split(/:| /).map(Number);
-
-                    const daysMapping = {
-                        M: "MO", // Monday
-                        T: "TU", // Tuesday
-                        W: "WE", // Wednesday
-                        R: "TH", // Thursday
-                        F: "FR"  // Friday
-                    };
-
-                    const byDay = daysOfWeek.split("").map(day => daysMapping[day]);
-
-                    calendar.createEvent({
-                        start: new Date(startDate.setHours(startHour + (startTime.includes("PM") && startHour < 12 ? 12 : 0), startMinute)),
-                        end: new Date(startDate.setHours(endHour + (endTime.includes("PM") && endHour < 12 ? 12 : 0), endMinute)),
-                        timezone: "America/Chicago",
-                        summary: parsedData.title,
-                        description: `Class: ${parsedData.title}`,
-                        location: parsedData.lecture.split(" ").slice(-4).join(" ") || "Unknown Location",
-                        repeating: {
-                            freq: "WEEKLY",
-                            byDay,
-                            until: endDate,
-                            exclude: excludedDates 
-                        }
-                    });
-                }
+                const [_, days, startTime, endTime, location] = parsedData.lecture.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
+                addEventToCalendar(calendar, parsedData.title, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
+
+            if (parsedData.discussion) {
+                const [_, days, startTime, endTime, location] = parsedData.discussion.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
+                addEventToCalendar(calendar, `${parsedData.title} - Discussion`, location, days, startTime, endTime, startDate, endDate, excludedDates);
+            }
+
+            if (parsedData.exam) {
+                const [date, timeRange] = parsedData.exam.split(', ');
+                const [startTime, endTime] = timeRange.split(' - ');
+                const examDate = new Date(date);
+
+                calendar.createEvent({
+                    start: parseTime(startTime, examDate),
+                    end: parseTime(endTime, examDate),
+                    timezone: "America/Chicago",
+                    summary: `${parsedData.title} - Exam`,
+                    description: `Exam for ${parsedData.title}`,
+                    location: "See course details",
+                });
+            }
+
         } catch (error) {
             console.error("Error parsing event data:", error);
         }
     }
 
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-    res.setHeader(
-        "Content-Disposition",
-        'attachment; filename="schedule.ics"'
-    );
+    res.setHeader("Content-Disposition", 'attachment; filename="schedule.ics"');
 
     res.send(calendar.toString());
 });
