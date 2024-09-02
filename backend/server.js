@@ -58,21 +58,35 @@ const loadSemesterDates = () => {
 const parseTime = (timeString, date) => {
     const [time, modifier] = timeString.split(' ');
     let [hours, minutes] = time.split(':').map(Number);
+
     if (modifier === 'PM' && hours < 12) hours += 12;
-    if (modifier === 'AM' && hours === 12) hours = 0;
+    if (modifier === 'AM' && hours === 12) hours = 0; 
+
+    if (modifier === 'AM' && hours < 12 && hours !== 0) hours += 0; 
 
     const parsedDate = new Date(date);
     parsedDate.setHours(hours, minutes, 0, 0);
+    console.log(`Parsed time: ${parsedDate}`);  
     return parsedDate;
 };
 
-const adjustDateToDayOfWeek = (date, dayOfWeek) => {
-    const currentDay = date.getDay(); // sunday - saturday maps to 0 - 6
-    const targetDay = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].indexOf(dayOfWeek);
-    const dayDifference = (targetDay - currentDay + 7) % 7;
-    const adjustedDate = new Date(date);
-    adjustedDate.setDate(date.getDate() + dayDifference);
-    return adjustedDate;
+const parseDateWithYear = (dateString, year) => {
+    const [month, day] = dateString.split(' ');
+    const monthMap = {
+        January: 0,
+        February: 1,
+        March: 2,
+        April: 3,
+        May: 4,
+        June: 5,
+        July: 6,
+        August: 7,
+        September: 8,
+        October: 9,
+        November: 10,
+        December: 11
+    };
+    return new Date(year, monthMap[month], parseInt(day));
 };
 
 const addEventToCalendar = (calendar, title, location, days, startTime, endTime, startDate, endDate, excludedDates) => {
@@ -80,7 +94,12 @@ const addEventToCalendar = (calendar, title, location, days, startTime, endTime,
 
     days.split('').forEach(day => {
         const dayOfWeek = daysMapping[day];
-        const eventStartDate = adjustDateToDayOfWeek(new Date(startDate), dayOfWeek);
+        const eventStartDate = new Date(startDate);
+        const currentDay = eventStartDate.getDay();
+        const targetDay = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].indexOf(dayOfWeek);
+        const dayDifference = (targetDay - currentDay + 7) % 7;
+
+        eventStartDate.setDate(eventStartDate.getDate() + dayDifference);
         const eventEndDate = new Date(eventStartDate);
 
         calendar.createEvent({
@@ -107,12 +126,14 @@ app.post("/", (req, res) => {
 
     const { startDate, endDate } = loadSemesterDates();
     const excludedDates = loadExcludedDates();
+    const currentYear = new Date().getFullYear();
 
     for (const key in req.body) {
         try {
             const parsedData = JSON.parse(req.body[key]);
+            console.log(`Processing course: ${parsedData.title}`);
 
-            if (parsedData.lecture && !parsedData.lecture.includes("ONLINE")) {
+            if (parsedData.lecture) {
                 const [_, days, startTime, endTime, location] = parsedData.lecture.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, parsedData.title, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
@@ -122,19 +143,36 @@ app.post("/", (req, res) => {
                 addEventToCalendar(calendar, `${parsedData.title} - Discussion`, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
 
-            if (parsedData.exam) {
-                const [date, timeRange] = parsedData.exam.split(', ');
-                const [startTime, endTime] = timeRange.split(' - ');
-                const examDate = new Date(date);
+            if (parsedData.lab) {
+                const [_, days, startTime, endTime, location] = parsedData.lab.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
+                addEventToCalendar(calendar, `${parsedData.title} - Lab`, location, days, startTime, endTime, startDate, endDate, excludedDates);
+            }
 
-                calendar.createEvent({
-                    start: parseTime(startTime, examDate),
-                    end: parseTime(endTime, examDate),
-                    timezone: "America/Chicago",
-                    summary: `${parsedData.title} - Exam`,
-                    description: `Exam for ${parsedData.title}`,
-                    location: "See course details",
-                });
+            if (parsedData.exam) {
+                console.log(`Found exam for course: ${parsedData.title}`);
+                try {
+                    const [date, timeRange] = parsedData.exam.split(', ');
+                    const [startTime, endTime] = timeRange.split(' - ');
+
+                    const examDate = parseDateWithYear(date, currentYear);
+
+                    const examStartDate = parseTime(startTime, examDate);
+                    const examEndDate = parseTime(endTime, examDate);
+
+                    console.log(`Creating exam event for: ${parsedData.title}`);
+                    calendar.createEvent({
+                        start: examStartDate,
+                        end: examEndDate,
+                        timezone: "America/Chicago",
+                        summary: `${parsedData.title} - Exam`,
+                        description: `Exam for ${parsedData.title}`,
+                        location: "See course details",
+                    });
+                } catch (error) {
+                    console.error(`Error processing exam for ${parsedData.title}:`, error);
+                }
+            } else {
+                console.log(`No exam found for course: ${parsedData.title}`);
             }
 
         } catch (error) {
