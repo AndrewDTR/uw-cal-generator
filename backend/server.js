@@ -162,6 +162,11 @@ app.post("/", (req, res) => {
                 addEventToCalendar(calendar, `${parsedData.title} - Discussion`, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
 
+            if (parsedData.seminar) {
+                const [_, days, startTime, endTime, location] = parsedData.seminar.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
+                addEventToCalendar(calendar, `${parsedData.title} - Seminar`, location, days, startTime, endTime, startDate, endDate, excludedDates);
+            }
+
             if (parsedData.lab) {
                 const [_, days, startTime, endTime, location] = parsedData.lab.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, `${parsedData.title} - Lab`, location, days, startTime, endTime, startDate, endDate, excludedDates);

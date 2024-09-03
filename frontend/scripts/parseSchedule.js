@@ -17,6 +17,10 @@ export function parseSchedule(scheduleText) {
                 // console.log("lecture" + line);
                 activeClass.lecture = line;
                 break;
+            case 'SEM':
+                // console.log("seminar" + line);
+                activeClass.seminar = line;
+                break;
             case 'DIS':
                 // console.log("discussion" + line);
                 activeClass.discussion = line;
@@ -44,7 +48,7 @@ export function parseSchedule(scheduleText) {
     });
 
     // save the last class, if any
-    if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion)) {
+    if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion || activeClass.seminar)) {
         classes[activeClass.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()] = activeClass;
     }
 
@@ -59,6 +63,8 @@ function getLineType(line) {
         return 'DIS';
     } else if (line.startsWith("LAB")) {
         return 'LAB';
+    } else if (line.startsWith("SEM")) {
+        return 'SEM';
     } else if (monthList.some(month => line.startsWith(month))) {
         return 'EXAM';
     } else if (line != "" && !line.startsWith("Weekly Meetings") && !line.startsWith("Exams") &&
