@@ -3,10 +3,18 @@ const ical = require("ical-generator").default;
 const { ICalCalendarMethod } = require("ical-generator");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+const corsOptions = {
+	origin: "https://schedule.amoses.dev",
+	optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 
 const loadExcludedDates = () => {
     const filePath = path.join(__dirname, "dates.json");
@@ -211,6 +219,6 @@ app.get("/api/dates", (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+app.listen(1111, () => {
+    console.log("Server is running on port 1111");
 });

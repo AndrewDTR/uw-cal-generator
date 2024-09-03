@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
             urlEncodedData.append(key, JSON.stringify(value));
         }
     
-        fetch("http://localhost:3000/", {
+        fetch("https://api.amoses.dev/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error('Error:', error));
     });
 
-    fetch('http://localhost:3000/api/dates')
+    fetch('https://api.amoses.dev/api/dates')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network error');
@@ -188,7 +188,7 @@ function sendData(data) {
         urlEncodedData.append(key, JSON.stringify(value));
     }
 
-    fetch("http://localhost:3000/", {
+    fetch("https://api.amoses.dev/", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
