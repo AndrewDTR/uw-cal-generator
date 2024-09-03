@@ -49,27 +49,39 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: urlEncodedData.toString(),
         })
-            .then(response => {
-                if (response.ok) {
-                    return response.blob(); 
-                } else {
-                    throw new Error('Network response was not ok.');
-                }
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'schedule.ics'; 
-                document.body.appendChild(a);
-                a.click(); 
-                a.remove(); 
-            })
-            .catch(error => console.error('Error:', error));
+        .then(response => {
+            if (response.status === 529) {
+                throw new Error('RateLimitExceeded');
+            }
+            if (response.ok) {
+                return response.blob(); 
+            } else {
+                throw new Error('Network response was not ok.');
+            }
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'schedule.ics'; 
+            document.body.appendChild(a);
+            a.click(); 
+            a.remove(); 
+        })
+        .catch(error => {
+            if (error.message === 'RateLimitExceeded') {
+                alert("You've hit the rate limit, please don't spam. Come back later.");
+            } else {
+                console.error('Error:', error);
+            }
+        });
     });
 
     fetch('https://api.amoses.dev/api/dates')
         .then(response => {
+            if (response.status === 529) {
+                throw new Error('RateLimitExceeded');
+            }
             if (!response.ok) {
                 throw new Error('Network error');
             }
@@ -112,15 +124,17 @@ document.addEventListener('DOMContentLoaded', function () {
             
         })
         .catch(error => {
-            console.error('Error fetching schedule data:', error);
+            if (error.message === 'RateLimitExceeded') {
+                alert("You've hit the rate limit, please don't spam. Come back later.");
+            } else {
+                console.error('Error fetching schedule data:', error);
 
-            var currentSemesterElement = document.getElementById('current-semester');
-            currentSemesterElement.innerHTML = `Current Semester Detected: Error`;
+                var currentSemesterElement = document.getElementById('current-semester');
+                currentSemesterElement.innerHTML = `Current Semester Detected: Error`;
+            }
         });
-
-
-
 });
+
 
 // sanitize input to prevent any scripting attacks
 function escapeHTML(input) {
