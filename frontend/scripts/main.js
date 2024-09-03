@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             a.remove();
         })
         .catch(error => {
-            console.log('Error caught:', error); // Added for debugging
+            console.log('Error caught:', error); 
             if (error.message === 'RateLimitExceeded') {
                 alert("You've hit the rate limit, please don't spam. Come back later.");
             } else {
