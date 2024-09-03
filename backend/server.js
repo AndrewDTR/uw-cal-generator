@@ -4,7 +4,6 @@ const { ICalCalendarMethod } = require("ical-generator");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -16,16 +15,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-const limiter = rateLimit({
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    max: 25, // ...for every 25 requests from an IP
-    message: "Too many requests from this IP, please try again after 5 minutes",
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
-app.use(limiter);
 
 const loadExcludedDates = () => {
     const filePath = path.join(__dirname, "dates.json");
