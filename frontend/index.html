@@ -97,7 +97,9 @@
                       Make sure that all of your classes and their respective
                       times were parsed correctly. If everything looks good,
                       press the "download" button! Instructions for how to use
-                      this <code>.ical</code> file are near the button.
+                      this <code>.ical</code> file are near the button. After
+                      importing into your calendar software of choice, double
+                      check it for accuracy!
                     </li>
                   </ol>
                 </div>
@@ -154,13 +156,15 @@
 
         <div class="col-md-6 d-flex flex-column">
           <div class="row">
-            <div
-              class="col-12 border border-dark p-3 results real-one"
-              style="flex-shrink: 0"
-            >
-              <h3>Waiting for class data to be pasted...</h3>
+            <div class="col-12 border border-dark p-3 results real-one" style="flex-shrink: 0">
+              <h3 style="display: inline-block; margin-right: 10px;">Waiting for class data to be pasted...</h3>
+              <div class="spinner-border" role="status" style="display: inline-block; width: 1.5rem; height: 1.5rem;">
+                <span class="visually-hidden">Loading...</span>
+              </div>
             </div>
           </div>
+          
+          
           <div class="row flex-grow-1">
             <div
               class="border border-dark align-items-center justify-content-center"
@@ -179,6 +183,24 @@
               >
                 Download schedule
               </button>
+
+              <div class="alert alert-warning" role="alert">
+                <strong>Instructions:</strong> After downloading the file, you
+                can import it into your calendar app of choice. For Google
+                Calendar, go to
+                <a
+                  href="https://calendar.google.com/calendar/r/settings/export"
+                  target="_blank"
+                  >this link</a
+                >
+                and import the file. For Apple Calendar, follow the instructions
+                at
+                <a
+                  href="https://support.apple.com/guide/calendar/import-or-export-calendars-icl1023/mac"
+                  target="_blank"
+                  >this link</a
+                >.
+              </div>
             </div>
           </div>
         </div>
