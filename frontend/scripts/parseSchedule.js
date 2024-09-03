@@ -35,7 +35,7 @@ export function parseSchedule(scheduleText) {
                 break;
             case 'COURSE_TITLE':
                 // console.log("course title " + line);
-                if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion)) {
+                if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion || activeClass.seminar)) {
                     // make the json object's class title be alphanumeric, to stop any weirdness with colons etc. in their titles
                     classes[activeClass.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()] = activeClass;
                     activeClass = {};
