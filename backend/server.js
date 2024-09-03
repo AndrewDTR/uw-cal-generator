@@ -3,12 +3,10 @@ const ical = require("ical-generator").default;
 const { ICalCalendarMethod } = require("ical-generator");
 const fs = require("fs");
 const path = require("path");
-const cors = require('cors');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
 
 const loadExcludedDates = () => {
     const filePath = path.join(__dirname, "dates.json");
@@ -92,18 +90,27 @@ const parseDateWithYear = (dateString, year) => {
 const addEventToCalendar = (calendar, title, location, days, startTime, endTime, startDate, endDate, excludedDates) => {
     const daysMapping = { M: 'MO', T: 'TU', W: 'WE', R: 'TH', F: 'FR' };
 
-    days.split('').forEach(day => {
-        const dayOfWeek = daysMapping[day];
-        const eventStartDate = new Date(startDate);
-        const currentDay = eventStartDate.getDay();
-        const targetDay = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'].indexOf(dayOfWeek);
-        const dayDifference = (targetDay - currentDay + 7) % 7;
+    const daysOfWeek = days.split('').map(day => daysMapping[day]);
 
-        eventStartDate.setDate(eventStartDate.getDate() + dayDifference);
-        const eventEndDate = new Date(eventStartDate);
+    let firstEventDate = new Date(startDate);
+    let foundFirstDay = false;
+
+    for (let i = 0; i < 7; i++) {
+        const currentDayCode = daysMapping[firstEventDate.toLocaleString('en-US', { weekday: 'short' }).charAt(0)];
+        if (daysOfWeek.includes(currentDayCode)) {
+            foundFirstDay = true;
+            break;
+        }
+        firstEventDate.setDate(firstEventDate.getDate() + 1);
+    }
+
+    if (foundFirstDay) {
+        const eventEndDate = new Date(firstEventDate);
+
+        const adjustedExcludedDates = excludedDates.map(date => parseTime(startTime, date));
 
         calendar.createEvent({
-            start: parseTime(startTime, eventStartDate),
+            start: parseTime(startTime, firstEventDate),
             end: parseTime(endTime, eventEndDate),
             timezone: "America/Chicago",
             summary: title,
@@ -111,13 +118,17 @@ const addEventToCalendar = (calendar, title, location, days, startTime, endTime,
             location: location,
             repeating: {
                 freq: 'WEEKLY',
-                byDay: [dayOfWeek],
+                byDay: daysOfWeek,
                 until: endDate,
-                exclude: excludedDates
+                exclude: adjustedExcludedDates
             }
         });
-    });
+    } else {
+        console.error(`No valid day found for the initial event in the days: ${days}`);
+    }
 };
+
+
 
 app.post("/", (req, res) => {
     console.log("Received body:", req.body);
