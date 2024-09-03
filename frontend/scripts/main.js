@@ -50,11 +50,11 @@ document.addEventListener('DOMContentLoaded', function () {
             body: urlEncodedData.toString(),
         })
         .then(response => {
-            if (response.status === 529) {
+            if (response.status === 429) {
                 throw new Error('RateLimitExceeded');
             }
             if (response.ok) {
-                return response.blob(); 
+                return response.blob();
             } else {
                 throw new Error('Network response was not ok.');
             }
@@ -63,12 +63,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'schedule.ics'; 
+            a.download = 'schedule.ics';
             document.body.appendChild(a);
-            a.click(); 
-            a.remove(); 
+            a.click();
+            a.remove();
         })
         .catch(error => {
+            console.log('Error caught:', error); // Added for debugging
             if (error.message === 'RateLimitExceeded') {
                 alert("You've hit the rate limit, please don't spam. Come back later.");
             } else {
@@ -76,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+    
 
     fetch('https://api.amoses.dev/api/dates')
         .then(response => {
