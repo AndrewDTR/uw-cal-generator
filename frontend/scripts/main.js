@@ -180,7 +180,7 @@ function displayScheduleData(scheduleData, targetDiv) {
         content += `<div class="col-md-6 class-detail card">`;
         content += `<h5>${escapeHTML(classInfo.title)}</h5>`;
 
-        ['lecture', 'discussion', 'lab', 'exam', 'seminar'].forEach(field => {
+        ['lecture', 'discussion', 'lab', 'seminar', 'exam'].forEach(field => {
             if (classInfo[field]) {
                 content += `<p class="condensed">${escapeHTML(field.charAt(0).toUpperCase() + field.slice(1))}: ${escapeHTML(classInfo[field])}</p>`;
             }
