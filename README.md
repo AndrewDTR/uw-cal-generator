@@ -8,7 +8,7 @@ The frontend is just [a vanilla HTML page using Bootstrap](./frontend/index.html
 
 The backend, using Express, is responsible for displaying the dynamic information on the page (current semester, start date, end date, and academic breaks) and generating the `.ics` file with the corresponding events. It uses [this lovely npm package called ical-generator](https://www.npmjs.com/package/ical-generator) to create the events. On my VPS, I use pm2 to run it.
 
-To exclude certain dates, the frontend and backend the `backend\dates.json`. It uses the following format:
+To exclude certain dates, the backend uses (and exposes through the API) the `backend\dates.json` file. It uses the following format:
 
 ```json
 {
