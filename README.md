@@ -24,7 +24,7 @@ To exclude certain dates, the frontend and backend the `backend\dates.json`. It 
             "title": "Labor Day",
             "date": "2024-09-02"
         }
-    ],❤️
+    ],
     "range": [
         {
             "title": "Thanksgiving Recess",
