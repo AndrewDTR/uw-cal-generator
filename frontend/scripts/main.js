@@ -138,7 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function cleanInput(input) {
-    return input.trim().replace(/\s+/g, ' ');
+    return input
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join('\n');
 }
 
 // sanitize input to prevent any scripting attacks
