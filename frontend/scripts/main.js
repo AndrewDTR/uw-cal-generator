@@ -31,7 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let dateData = {};
 
     textarea.addEventListener('input', function () {
-        scheduleData = parseSchedule(this.value);
+        const cleanedInput = cleanInput(this.value);
+        scheduleData = parseSchedule(cleanedInput);
         displayScheduleData(scheduleData, resultsDiv);
     });
 
@@ -77,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-    
 
     fetch('https://api.amoses.dev/api/dates')
         .then(response => {
@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 });
 
+function cleanInput(input) {
+    return input.trim().replace(/\s+/g, ' ');
+}
 
 // sanitize input to prevent any scripting attacks
 function escapeHTML(input) {
