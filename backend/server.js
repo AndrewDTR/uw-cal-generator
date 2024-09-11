@@ -10,8 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const corsOptions = {
-	origin: "https://schedule.amoses.dev",
-	optionsSuccessStatus: 200
+    origin: "https://schedule.amoses.dev",
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -66,13 +66,13 @@ const parseTime = (timeString, date) => {
     let [hours, minutes] = time.split(':').map(Number);
 
     if (modifier === 'PM' && hours < 12) hours += 12;
-    if (modifier === 'AM' && hours === 12) hours = 0; 
+    if (modifier === 'AM' && hours === 12) hours = 0;
 
-    if (modifier === 'AM' && hours < 12 && hours !== 0) hours += 0; 
+    if (modifier === 'AM' && hours < 12 && hours !== 0) hours += 0;
 
     const parsedDate = new Date(date);
     parsedDate.setHours(hours, minutes, 0, 0);
-    console.log(`Parsed time: ${parsedDate}`);  
+    console.log(`Parsed time: ${parsedDate}`);
     return parsedDate;
 };
 

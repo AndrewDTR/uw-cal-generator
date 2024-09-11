@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelector('button.btn.btn-primary').addEventListener('click', function () {
         const urlEncodedData = new URLSearchParams();
-    
+
         for (const [key, value] of Object.entries(scheduleData)) {
             urlEncodedData.append(key, JSON.stringify(value));
         }
-    
+
         fetch("https://api.amoses.dev/", {
             method: "POST",
             headers: {
@@ -50,33 +50,33 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: urlEncodedData.toString(),
         })
-        .then(response => {
-            if (response.status === 429) {
-                throw new Error('RateLimitExceeded');
-            }
-            if (response.ok) {
-                return response.blob();
-            } else {
-                throw new Error('Network response was not ok.');
-            }
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'schedule.ics';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        })
-        .catch(error => {
-            console.log('Error caught:', error); 
-            if (error.message === 'RateLimitExceeded') {
-                alert("You've hit the rate limit, please don't spam. Come back later.");
-            } else {
-                console.error('Error:', error);
-            }
-        });
+            .then(response => {
+                if (response.status === 429) {
+                    throw new Error('RateLimitExceeded');
+                }
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'schedule.ics';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                console.log('Error caught:', error);
+                if (error.message === 'RateLimitExceeded') {
+                    alert("You've hit the rate limit, please don't spam. Come back later.");
+                } else {
+                    console.error('Error:', error);
+                }
+            });
     });
 
     fetch('https://api.amoses.dev/api/dates')
@@ -102,28 +102,28 @@ document.addEventListener('DOMContentLoaded', function () {
             if (dateData['start-end'] || dateData.once || dateData.range) {
                 var eventElement = document.createElement('div');
                 eventElement.style.paddingBottom = '1px';
-            
+
                 eventElement.innerHTML = `<strong>Semester Classes Start Date:</strong> ${dateData['start-end'].start_date}<br><strong>Semester Classes End Date:</strong> ${dateData['start-end'].end_date}`;
                 breaksElement.appendChild(eventElement);
-            
+
                 eventElement = document.createElement('div');
                 eventElement.innerHTML = `<h5 style="padding-top: 10px;">Academic Breaks for this Semester:</h5>`;
                 breaksElement.appendChild(eventElement);
-            
+
                 dateData.once.forEach(event => {
                     eventElement = document.createElement('div');
                     eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.date}`;
                     breaksElement.appendChild(eventElement);
                 });
-            
+
                 dateData.range.forEach(event => {
                     eventElement = document.createElement('div');
                     eventElement.innerHTML = `<strong>${event.title}</strong>: ${event.start_date} to ${event.end_date}`;
                     breaksElement.appendChild(eventElement);
                 });
             }
-            
-            
+
+
         })
         .catch(error => {
             if (error.message === 'RateLimitExceeded') {
