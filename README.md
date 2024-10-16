@@ -1,8 +1,10 @@
 # 📅 🦡 UW Calendar Generator
 
+*An ics/ical generator to automatically convert UW-Madison schedules into calendar events (for use in Google Calendar or Outlook). Not associated with the University.*
+
 ## Infrastructure
 
-I, like many other students at UW-Madison, put my class schedule into apps like Google Calendar for convenience. However, this can be pretty tedious, especially when dealing with reoccuring events and school holidays. With this tool, all you have to do is paste in your course schedule, and it'll give you a formatted .ical file that you can import into the calendar app of your choice.
+I, like many other students at UW-Madison, put my class schedule into apps like Google Calendar for convenience. However, this can be pretty tedious, especially when dealing with reoccuring events and school holidays. With this tool, all you have to do is paste in your course schedule, and it'll give you a formatted .ics file that you can import into the calendar app of your choice.
 
 The frontend is just [a vanilla HTML page using Bootstrap](./frontend/index.html). I have my webserver (Caddy) with a `file_server` directive pointing into the `frontend` folder. It parses the schedule, shows it to the user, and sends it to the backend when the user downloads their schedule.
 
