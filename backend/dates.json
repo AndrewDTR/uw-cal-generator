@@ -1,17 +1,17 @@
 {
     "info": {
-        "semester": "Fall 2024"
+        "semester": "Spring 2025"
     },
     "start-end": {
-        "start_date": "2024-09-04",
-        "end_date": "2024-12-11"
+        "start_date": "2025-01-21",
+        "end_date": "2025-05-02"
     },
     "once": [],
     "range": [
         {
-            "title": "Thanksgiving Recess",
-            "start_date": "2024-11-28",
-            "end_date": "2024-12-01"
+            "title": "Spring Recess",
+            "start_date": "2025-03-22",
+            "end_date": "2025-03-30"
         }
     ]
 }
