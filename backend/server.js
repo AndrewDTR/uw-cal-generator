@@ -148,59 +148,71 @@ app.post("/", (req, res) => {
     const currentYear = new Date().getFullYear();
 
     for (const key in req.body) {
-        try {
-            const parsedData = JSON.parse(req.body[key]);
-            console.log(`Processing course: ${parsedData.title}`);
+        const parsedData = JSON.parse(req.body[key]);
+        console.log(`Processing course: ${parsedData.title}`);
 
+        try {
             if (parsedData.lecture) {
                 const [_, days, startTime, endTime, location] = parsedData.lecture.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, parsedData.title, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
+        } catch (error) {
+            console.error("Error parsing event data:", error);
+        }
 
+        try {
             if (parsedData.discussion) {
                 const [_, days, startTime, endTime, location] = parsedData.discussion.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, `${parsedData.title} - Discussion`, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
+        } catch (error) {
+            console.error("Error parsing event data:", error);
+        }
 
+        try {
             if (parsedData.seminar) {
                 const [_, days, startTime, endTime, location] = parsedData.seminar.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, `${parsedData.title} - Seminar`, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
+        } catch (error) {
+            console.error("Error parsing event data:", error);
+        }
 
+        try {
             if (parsedData.lab) {
                 const [_, days, startTime, endTime, location] = parsedData.lab.match(/([A-Z]+)\s(\d{1,2}:\d{2} [APM]{2})\s-\s(\d{1,2}:\d{2} [APM]{2})\s(.+)/);
                 addEventToCalendar(calendar, `${parsedData.title} - Lab`, location, days, startTime, endTime, startDate, endDate, excludedDates);
             }
-
-            if (parsedData.exam) {
-                console.log(`Found exam for course: ${parsedData.title}`);
-                try {
-                    const [date, timeRange] = parsedData.exam.split(', ');
-                    const [startTime, endTime] = timeRange.split(' - ');
-
-                    const examDate = parseDateWithYear(date, currentYear);
-
-                    const examStartDate = parseTime(startTime, examDate);
-                    const examEndDate = parseTime(endTime, examDate);
-
-                    console.log(`Creating exam event for: ${parsedData.title}`);
-                    calendar.createEvent({
-                        start: examStartDate,
-                        end: examEndDate,
-                        timezone: "America/Chicago",
-                        summary: `${parsedData.title} - Exam`,
-                        description: `Exam for ${parsedData.title}`,
-                        location: "See course details",
-                    });
-                } catch (error) {
-                    console.error(`Error processing exam for ${parsedData.title}:`, error);
-                }
-            } else {
-                console.log(`No exam found for course: ${parsedData.title}`);
-            }
-
         } catch (error) {
             console.error("Error parsing event data:", error);
+        }
+
+
+        if (parsedData.exam) {
+            console.log(`Found exam for course: ${parsedData.title}`);
+            try {
+                const [date, timeRange] = parsedData.exam.split(', ');
+                const [startTime, endTime] = timeRange.split(' - ');
+
+                const examDate = parseDateWithYear(date, currentYear);
+
+                const examStartDate = parseTime(startTime, examDate);
+                const examEndDate = parseTime(endTime, examDate);
+
+                console.log(`Creating exam event for: ${parsedData.title}`);
+                calendar.createEvent({
+                    start: examStartDate,
+                    end: examEndDate,
+                    timezone: "America/Chicago",
+                    summary: `${parsedData.title} - Exam`,
+                    description: `Exam for ${parsedData.title}`,
+                    location: "See course details",
+                });
+            } catch (error) {
+                console.error(`Error processing exam for ${parsedData.title}:`, error);
+            }
+        } else {
+            console.log(`No exam found for course: ${parsedData.title}`);
         }
     }
 
