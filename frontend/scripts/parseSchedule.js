@@ -1,76 +1,103 @@
-const monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS_RE =
+    /January|February|March|April|May|June|July|August|September|October|November|December/;
 
-export function parseSchedule(scheduleText) {
-    let scheduleList = scheduleText.split("\n");
-    let classes = {};
-    let activeClass = {};
+const bullets = /^\s*(?:[-–—•▪◦*]\s*)+/;
+const enumPrefix = /^\s*\d+\.\s*/;
+const WS_RE = /\s+/g;
 
-    scheduleList.forEach(line => {
-        if (line == "Courses") {
-            // this is the first line of the schedule. some people might accidentally include this
-        }
-
-        let lineType = getLineType(line);
-
-        switch (lineType) {
-            case 'LEC':
-                // console.log("lecture" + line);
-                activeClass.lecture = line;
-                break;
-            case 'SEM':
-                // console.log("seminar" + line);
-                activeClass.seminar = line;
-                break;
-            case 'DIS':
-                // console.log("discussion" + line);
-                activeClass.discussion = line;
-                break;
-            case 'LAB':
-                // console.log("lab " + line);
-                activeClass.lab = line;
-                break;
-            case 'EXAM':
-                // console.log("exam date" + line);
-                activeClass.exam = line;
-                break;
-            case 'COURSE_TITLE':
-                // console.log("course title " + line);
-                if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion || activeClass.seminar)) {
-                    // make the json object's class title be alphanumeric, to stop any weirdness with colons etc. in their titles
-                    classes[activeClass.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()] = activeClass;
-                    activeClass = {};
-                }
-                activeClass.title = line;
-                break;
-            default:
-                break;
-        }
-    });
-
-    // save the last class, if any
-    if (activeClass.title && (activeClass.lab || activeClass.lecture || activeClass.discussion || activeClass.seminar)) {
-        classes[activeClass.title.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()] = activeClass;
-    }
-
-    return classes;
+function normalizeLine(line) {
+    return line
+        .replace(/\r/g, "")
+        .replace(/\u00A0/g, " ")
+        .replace(bullets, "")
+        .replace(enumPrefix, "")
+        .trim()
+        .replace(WS_RE, " ");
 }
 
-// helper method for switch statement above to determine line type
-function getLineType(line) {
-    if (line.startsWith("LEC")) {
-        return 'LEC';
-    } else if (line.startsWith("DIS")) {
-        return 'DIS';
-    } else if (line.startsWith("LAB")) {
-        return 'LAB';
-    } else if (line.startsWith("SEM")) {
-        return 'SEM';
-    } else if (monthList.some(month => line.startsWith(month))) {
-        return 'EXAM';
-    } else if (line != "" && !line.startsWith("Weekly Meetings") && !line.startsWith("Exams") &&
-        !line.startsWith("None provided") && !line.startsWith("This course may have")) {
-        return 'COURSE_TITLE';
-    } else {
-        return 'IGNORE';
+const COURSE_RE =
+    /^([A-Z][A-Z&\s]{1,}\s+\d{3}[A-Z]?):\s*(.+)$/;
+
+const MEETING_RE =
+    /^(LEC|DIS|LAB|SEM)\s+(\d{3}[A-Z]?)\s+([MTWRFSU]+)\s+(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)\s+(.+)$/;
+
+const EXAM_RE =
+    /^(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)(?:\s*-\s*(.*))?$/;
+
+function tokenizeLine(rawLine) {
+    const line = normalizeLine(rawLine);
+    if (!line) return { type: "IGNORE" };
+
+    let m;
+    if ((m = line.match(COURSE_RE))) {
+        return { type: "COURSE", code: m[1], title: m[2], display: line };
     }
+    if ((m = line.match(MEETING_RE))) {
+        return {
+            type: "MEETING",
+            kind: m[1],
+            section: m[2],
+            days: m[3],
+            start: m[4],
+            end: m[5],
+            location: m[6],
+            display: line
+        };
+    }
+    if ((m = line.match(EXAM_RE))) {
+        return {
+            type: "EXAM",
+            month: m[1],
+            day: m[2],
+            start: m[3],
+            end: m[4],
+            location: m[5] || "",
+            display: line
+        };
+    }
+    return { type: "IGNORE" };
+}
+
+export function parseSchedule(scheduleText) {
+    const classes = {};
+    let active = null;
+
+    for (const raw of scheduleText.split("\n")) {
+        const tok = tokenizeLine(raw);
+
+        if (tok.type === "COURSE") {
+            if (active && (active.lecture || active.lab || active.discussion || active.seminar)) {
+                classes[active.key] = active;
+            }
+            const title = tok.display;
+            active = {
+                title,
+                key: title.replace(/[^a-zA-Z0-9]/g, "").toLowerCase(),
+            };
+            continue;
+        }
+
+        if (!active) continue;
+
+        if (tok.type === "MEETING") {
+            const line = `${tok.kind} ${tok.section} ${tok.days} ${tok.start} - ${tok.end} ${tok.location}`;
+            const slot = tok.kind.toLowerCase();
+            if (slot === "lec") active.lecture = line;
+            else if (slot === "dis") active.discussion = line;
+            else if (slot === "lab") active.lab = line;
+            else if (slot === "sem") active.seminar = line;
+            continue;
+        }
+
+        if (tok.type === "EXAM") {
+            const line = `${tok.month} ${tok.day}, ${tok.start} - ${tok.end}${tok.location ? " - " + tok.location : ""}`;
+            active.exam = line;
+            continue;
+        }
+    }
+
+    if (active && (active.lecture || active.lab || active.discussion || active.seminar)) {
+        classes[active.key] = active;
+    }
+    return classes;
 }
