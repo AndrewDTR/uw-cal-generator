@@ -1,17 +1,22 @@
 {
     "info": {
-        "semester": "Spring 2026"
+        "semester": "Fall 2026"
     },
     "start-end": {
-        "start_date": "2026-01-20",
-        "end_date": "2026-05-01"
+        "start_date": "2026-09-02",
+        "end_date": "2026-12-09"
     },
-    "once": [],
+    "once": [
+        {
+            "title": "Labor Day",
+            "date": "2026-09-07"
+        }
+    ],
     "range": [
         {
-            "title": "Spring Recess",
-            "start_date": "2026-03-28",
-            "end_date": "2026-04-05"
+            "title": "Thanksgiving Recess",
+            "start_date": "2026-11-26",
+            "end_date": "2026-11-29"
         }
     ]
 }
